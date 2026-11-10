@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Snapshot Booth Loop</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one black stage, the film centered at 16:9, a thin mono caption row under it. */
+  :root {
+    --ground: #000000; --panel: #0e0f0d; --line: #262a23; --text: #ffffff; --mute: #8c9186; --lime: #ceeb13; --on-lime: #000000;
+    --sans: "Geist", "Helvetica Neue", Arial, sans-serif; --mono: "Geist Mono", ui-monospace, Menlo, monospace;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--ground); color: var(--text); font-family: var(--sans);
+    display: flex; flex-direction: column; justify-content: center; gap: 16px;
+    padding-block: 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); box-sizing: border-box; }
+  .stage { width: 100%; max-width: min(1600px, calc((100vh - 140px) * 16 / 9)); margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  video { display: block; width: 100%; max-width: 100%; aspect-ratio: 16 / 9; background: var(--panel); border: 1px solid var(--line); }
+  .bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); }
+  .bar b { color: var(--text); font-weight: 500; }
+  .acts { display: flex; gap: 10px; }
+  button { font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; padding: 10px 16px; border: 1px solid var(--line); background: transparent; color: var(--text); }
+  button.primary { background: var(--lime); color: var(--on-lime); border-color: var(--lime); }
+  button:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { button { transition: none; } }
+</style>
+</head>
+<body>
+<main class="stage">
+  <video id="film" src="snapshot-booth.mp4" autoplay muted loop playsinline controls preload="auto" aria-label="NVIDIA Snapshot on Crusoe Cloud booth loop"></video>
+  <div class="bar">
+    <span><b>NVIDIA Snapshot on Crusoe Cloud</b> / KubeCon booth loop / 49 s</span>
+    <span class="acts">
+      <button id="play" type="button">Pause</button>
+      <button id="full" class="primary" type="button">Full screen</button>
+    </span>
+  </div>
+</main>
+<script>
+  const film = document.getElementById("film");
+  const play = document.getElementById("play");
+  const full = document.getElementById("full");
+  const sync = () => { play.textContent = film.paused ? "Play" : "Pause"; };
+  film.addEventListener("play", sync);
+  film.addEventListener("pause", sync);
+  play.addEventListener("click", () => { film.paused ? film.play().catch(() => {}) : film.pause(); });
+  full.addEventListener("click", () => {
+    const req = film.requestFullscreen || film.webkitRequestFullscreen || film.webkitEnterFullscreen;
+    if (req) { try { const r = req.call(film); if (r && r.catch) r.catch(() => {}); } catch (e) {} }
+  });
+  film.play().catch(() => {});
+  sync();
+</script>
+</body>
+</html>
